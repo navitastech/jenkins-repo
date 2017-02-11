@@ -74,7 +74,7 @@ tfJobList.each { jobName ->
         steps {
 
         shell(
-          readFileFromWorkspace("terraform/${jobName}.sh")
+          readFileFromWorkspace("jobs/terraform/${jobName}.sh")
           )
 
         }
