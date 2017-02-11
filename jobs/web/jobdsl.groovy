@@ -63,7 +63,7 @@ webJobList.each { jobName ->
 
 
         shell(
-          readFileFromWorkspace("web/${jobName}.sh")
+          readFileFromWorkspace("jobs/web/${jobName}.sh")
         )
 
         }
