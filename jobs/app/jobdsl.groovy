@@ -27,23 +27,61 @@ listView('Demo-Api') {
 
 def createApiJobs() {
 apiJobList.each { jobName ->
-    pipelineJob("${jobName}") {
+    job("${jobName}") {
 
-      
-      
-       definition {
-       cpsScm {
-            scm {
-                git {
+      logRotator {
+          numToKeep(5)
+      }
+
+      concurrentBuild()
+
+      authenticationToken('remote12345')
+
+      if (jobName.contains("commit")) {
+      scm {
+
+            git {
                 remote {
-                    url ('https://github.com/')
+                    url ('https://github.com/VariQ/Navitas_Flash.git')
                 }
-                branch ('master-only-no-sec')
-           		 }
-       scriptPath("Jenkinsfile")
             }
+          }
+      }
+
+
+      wrappers {
+        colorizeOutput('xterm')
+        preBuildCleanup()
+      }
+
+      configure { project ->
+            project / 'buildWrappers' / 'com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper' / 'varPasswordPairs'() {
         }
-    }
+      }
+
+        steps {
+
+
+        shell(
+          readFileFromWorkspace("jobs/app/${jobName}.sh")
+        )
+
+        }
+
+        publishers {
+
+          if (jobName.contains("commit")) {
+
+            downstreamParameterized {
+              trigger("app-deploy-dev") {
+                   condition('SUCCESS')
+                   parameters {
+                       currentBuild()
+                    }
+              }
+            }
+          }
+        }
 
     }
 }
